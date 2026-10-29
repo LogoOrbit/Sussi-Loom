@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thank You — Sussi Loom</title>
+<meta name="description" content="Thank you for your Sussi Loom order.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="thanks">
+<div id="header"></div>
+<main class="wrap" id="ty-root"></main>
+<div id="footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener("sl:ready", () => {
+  const root = document.getElementById("ty-root");
+  let o = null;
+  try { o = JSON.parse(localStorage.getItem("sl_last_order")); } catch {}
+  if (!o) {
+    root.innerHTML = `<div class="thanks"><h1>Nothing to show here.</h1><p style="margin:20px 0 30px">We couldn't find a recent order on this device.</p><a class="btn" href="shop.html">Shop sussi</a></div>`;
+    return;
+  }
+  const first = o.name.split(" ")[0];
+  const msg = [
+    `Assalam o Alaikum Sussi Loom! I've placed order ${o.no}.`,
+    ``,
+    ...o.items.map(i => `• ${i.name}${i.size ? " (" + i.size + ")" : ""} × ${i.qty} — ${SL.pkr(i.price * i.qty)}`),
+    ``,
+    `Subtotal: ${SL.pkr(o.sub)}`, `Shipping: ${o.ship ? SL.pkr(o.ship) : "Free"}`, `Total: ${SL.pkr(o.total)}`,
+    `Payment: ${o.pay}`,
+    ``,
+    `Name: ${o.name}`, `Phone: ${o.phone}`, `Address: ${o.address}${o.area ? ", " + o.area : ""}, ${o.city}`,
+    o.notes ? `Notes: ${o.notes}` : ""
+  ].join("\n");
+  const wa = `https://wa.me/${SL.WA}?text=${encodeURIComponent(msg)}`;
+  root.innerHTML = `
+    <div class="thanks">
+      <svg class="seal" viewBox="0 0 150 150" fill="none">
+        <circle cx="75" cy="75" r="66" stroke="#a77a45" stroke-width="1"/>
+        <circle cx="75" cy="75" r="58" stroke="#a77a45" stroke-width=".6" stroke-dasharray="2 4"/>
+        <path d="M50 77l17 17 34-38" stroke="#5b3d22" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" pathLength="1" style="stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.2s .3s ease forwards"/>
+      </svg>
+      <style>@keyframes draw{to{stroke-dashoffset:0}}</style>
+      <span class="eyebrow">Order ${o.no}</span>
+      <h1 style="margin:16px 0">Shukriya, ${first}.</h1>
+      <p class="lead">Your sussi is spoken for. We'll message you on <b style="color:var(--brown)">${o.phone}</b> shortly to confirm your order${o.pay === "Cash on Delivery" ? "" : " and share payment details"}.</p>
+      <p class="hand" style="font-size:1.5rem;margin-top:14px">— with love, from the loom</p>
+
+      <div class="timeline">
+        <div class="done"><b>✓</b>Order placed</div>
+        <div><b>2</b>Confirmed on WhatsApp</div>
+        <div><b>3</b>Hand-wrapped &amp; shipped</div>
+        <div><b>4</b>At your door</div>
+      </div>
+
+      <a class="btn" href="${wa}" target="_blank" rel="noopener" style="background:#1f7a4c;border-color:#1f7a4c">Confirm instantly on WhatsApp</a>
+
+      <div class="order-box">
+        <h3 style="margin-bottom:16px">Order details</h3>
+        ${o.items.map(i => { const p = SL.byId(i.id); return `<div class="mini-item"><div class="thumb">${p ? SL.swatch(p, "drape") : ""}</div><div><div style="font-family:var(--serif);font-size:1.1rem;color:var(--ink)">${i.name}</div><small>${i.size ? "Size " + i.size + " · " : ""}Qty ${i.qty}</small></div><div>${SL.pkr(i.price * i.qty)}</div></div>`; }).join("")}
+        <div class="sum-row" style="margin-top:12px"><span>Subtotal</span><span>${SL.pkr(o.sub)}</span></div>
+        <div class="sum-row"><span>Shipping</span><span>${o.ship ? SL.pkr(o.ship) : "Free"}</span></div>
+        <div class="sum-row total"><span>Total</span><span>${SL.pkr(o.total)}</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px;font-size:.9rem">
+          <div><span class="opt-label" style="margin-top:0">Delivering to</span><p>${o.name}<br>${o.address}${o.area ? ", " + o.area : ""}<br>${o.city}</p></div>
+          <div><span class="opt-label" style="margin-top:0">Payment</span><p>${o.pay}</p></div>
+        </div>
+      </div>
+      <a class="link" href="shop.html" data-arrow>Continue shopping</a>
+    </div>`;
+  root.querySelectorAll("[data-arrow]").forEach(el => el.insertAdjacentHTML("beforeend", SL.I.arrow));
+});
+</script>
+</body>
+</html>

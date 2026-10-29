@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout — Sussi Loom</title>
+<meta name="description" content="Checkout securely with Sussi Loom.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="checkout">
+<div id="header"></div>
+<main class="wrap">
+  <div class="crumbs" style="padding-top:34px"><a href="cart.html">Cart</a> / Checkout</div>
+  <h1 style="font-size:clamp(2.4rem,4vw,3.4rem);margin-top:12px">Checkout</h1>
+  <div class="cart-layout" id="co-root"></div>
+</main>
+<div id="footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener("sl:ready", () => {
+  const root = document.getElementById("co-root");
+  const lines = SL.Cart.lines();
+  if (!lines.length) { location.replace("cart.html"); return; }
+  const t = SL.Cart.totals();
+  const cities = ["Karachi","Lahore","Islamabad","Rawalpindi","Hyderabad","Multan","Faisalabad","Peshawar","Quetta","Sialkot","Bahawalpur","Sukkur","Gujranwala","Other"];
+  const f = (id, label, type = "text", extra = "", cls = "") => `<div class="field ${cls}"><label for="${id}">${label}</label><input id="${id}" name="${id}" type="${type}" ${extra}><div class="err">Please fill this in correctly.</div></div>`;
+  root.innerHTML = `
+    <form id="co" novalidate>
+      <div class="form-section"><h3><span>01</span>Contact</h3>
+        <div class="form-grid">
+          ${f("name", "Full name", "text", 'autocomplete="name" required', "full")}
+          ${f("phone", "Mobile / WhatsApp", "tel", 'autocomplete="tel" placeholder="03XX XXXXXXX" required pattern="(\\+92|0)3[0-9]{2}[ -]?[0-9]{7}"')}
+          ${f("email", "Email (optional)", "email", 'autocomplete="email"')}
+        </div></div>
+      <div class="form-section"><h3><span>02</span>Delivery</h3>
+        <div class="form-grid">
+          ${f("address", "Street address", "text", 'autocomplete="street-address" required', "full")}
+          <div class="field"><label for="city">City</label><select id="city" name="city" required><option value="">Choose city</option>${cities.map(c => `<option>${c}</option>`).join("")}</select><div class="err">Please choose a city.</div></div>
+          ${f("area", "Area / landmark (optional)")}
+          <div class="field full"><label for="notes">Order notes (optional)</label><textarea id="notes" name="notes" rows="3" placeholder="Gift message, delivery timing…"></textarea></div>
+        </div></div>
+      <div class="form-section"><h3><span>03</span>Payment</h3>
+        <div class="pay-opts">
+          <label class="pay"><input type="radio" name="pay" value="Cash on Delivery" checked><div><b>Cash on delivery</b><small>Pay the rider when your parcel arrives.</small></div></label>
+          <label class="pay"><input type="radio" name="pay" value="Bank Transfer"><div><b>Bank transfer</b><small>We'll send account details on WhatsApp after you place the order.</small></div></label>
+          <label class="pay"><input type="radio" name="pay" value="JazzCash / Easypaisa"><div><b>JazzCash / Easypaisa</b><small>We'll share the mobile account on WhatsApp to send payment.</small></div></label>
+        </div></div>
+      <button class="btn block" type="submit" id="place">Place order · ${SL.pkr(t.total)}</button>
+      <p style="font-size:.8rem;margin-top:14px;text-align:center">We'll confirm every order personally on WhatsApp (${SL.PHONE}) before it ships.</p>
+    </form>
+    <aside class="summary">
+      <h3>Your order</h3>
+      ${lines.map(l => `<div class="mini-item"><div class="thumb">${SL.swatch(l.p, "drape")}</div><div><div style="font-family:var(--serif);font-size:1.1rem;color:var(--ink)">${l.p.name}</div><small>${l.size ? "Size " + l.size + " · " : ""}Qty ${l.qty}</small></div><div>${SL.pkr(l.p.price * l.qty)}</div></div>`).join("")}
+      <div class="sum-row" style="margin-top:14px"><span>Subtotal</span><span>${SL.pkr(t.sub)}</span></div>
+      <div class="sum-row"><span>Shipping</span><span>${t.ship ? SL.pkr(t.ship) : "Free"}</span></div>
+      <div class="sum-row total"><span>Total</span><span>${SL.pkr(t.total)}</span></div>
+    </aside>`;
+
+  const form = document.getElementById("co");
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    let ok = true;
+    form.querySelectorAll("[required]").forEach(el => {
+      const bad = !el.value.trim() || (el.pattern && !new RegExp("^" + el.pattern + "$").test(el.value.trim()));
+      el.closest(".field").classList.toggle("bad", bad);
+      if (bad) ok = false;
+    });
+    const em = form.email;
+    if (em.value && !em.checkValidity()) { em.closest(".field").classList.add("bad"); ok = false; } else em.closest(".field").classList.remove("bad");
+    if (!ok) { form.querySelector(".bad input, .bad select")?.focus(); return; }
+
+    const d = new Date();
+    const order = {
+      no: "SL-" + d.toISOString().slice(2, 10).replace(/-/g, "") + "-" + Math.floor(1000 + Math.random() * 9000),
+      date: d.toISOString(),
+      name: form.name.value.trim(), phone: form.phone.value.trim(), email: form.email.value.trim(),
+      address: form.address.value.trim(), area: form.area.value.trim(), city: form.city.value, notes: form.notes.value.trim(),
+      pay: form.pay.value,
+      items: lines.map(l => ({ id: l.p.id, name: l.p.name, size: l.size, qty: l.qty, price: l.p.price })),
+      ...t
+    };
+    try { localStorage.setItem("sl_last_order", JSON.stringify(order)); } catch {}
+    SL.Cart.clear();
+    location.href = "thank-you.html";
+  });
+});
+</script>
+</body>
+</html>

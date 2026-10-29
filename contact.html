@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — Sussi Loom</title>
+<meta name="description" content="Contact Sussi Loom on WhatsApp or phone: +92 317 7907812.">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="contact">
+<div id="header"></div>
+<main>
+  <section class="page-head">
+    <div class="stripes" data-swatch="gulab-gali" data-view="flat"></div>
+    <div class="wrap" style="position:relative">
+      <div class="crumbs"><a href="index.html">Home</a> / Contact</div>
+      <h1>Let's talk <em>sussi</em>.</h1>
+      <p>Questions about a weave, sizing, custom lengths or bulk orders for weddings — a real person will reply.</p>
+    </div>
+  </section>
+
+  <div class="wrap contact-grid">
+    <div class="rv">
+      <span class="eyebrow">Reach us</span><div class="divider">✦</div>
+      <a class="c-card" href="https://wa.me/923177907812" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/></svg><div><b>WhatsApp</b><span>+92 317 7907812 · fastest reply</span></div></a>
+      <a class="c-card" href="tel:+923177907812"><svg viewBox="0 0 24 24"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></svg><div><b>Call</b><span>+92 317 7907812</span></div></a>
+      <div class="c-card"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg><div><b>Studio</b><span>Karachi, Pakistan · visits by appointment</span></div></div>
+      <div class="c-card"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><b>Hours</b><span>Monday – Saturday · 11am – 8pm</span></div></div>
+      <img src="assets/img/cards.jpg" alt="Sussi Loom business cards" loading="lazy" style="margin-top:36px">
+    </div>
+    <div class="rv">
+      <span class="eyebrow">Send a message</span><div class="divider">✦</div>
+      <h2 style="margin-bottom:26px">Write to us.</h2>
+      <form id="cf" class="form-grid" novalidate>
+        <div class="field"><label for="n">Your name</label><input id="n" required autocomplete="name"><div class="err">Please add your name.</div></div>
+        <div class="field"><label for="ph">Phone</label><input id="ph" type="tel" required autocomplete="tel" placeholder="03XX XXXXXXX"><div class="err">Please add your phone.</div></div>
+        <div class="field full"><label for="t">Topic</label><select id="t"><option>A question about a weave</option><option>Sizing / custom length</option><option>My order</option><option>Wedding or bulk order</option><option>Something else</option></select></div>
+        <div class="field full"><label for="m">Message</label><textarea id="m" rows="6" required></textarea><div class="err">Please write a message.</div></div>
+        <div class="full"><button class="btn" type="submit" data-arrow>Send via WhatsApp</button>
+        <p style="font-size:.8rem;margin-top:12px">This opens WhatsApp with your message ready to send.</p></div>
+      </form>
+    </div>
+  </div>
+</main>
+<div id="footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.getElementById("cf").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target; let ok = true;
+  f.querySelectorAll("[required]").forEach(el => { const bad = !el.value.trim(); el.closest(".field").classList.toggle("bad", bad); if (bad) ok = false; });
+  if (!ok) return;
+  const txt = `Hi Sussi Loom,\n\n${f.m.value.trim()}\n\nTopic: ${f.t.value}\nName: ${f.n.value.trim()}\nPhone: ${f.ph.value.trim()}`;
+  window.open("https://wa.me/923177907812?text=" + encodeURIComponent(txt), "_blank");
+  SL.toast("Opening WhatsApp — thank you for writing to us.");
+  f.reset();
+});
+</script>
+</body>
+</html>

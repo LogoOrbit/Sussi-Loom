@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop Sussi — Sussi Loom</title>
+<meta name="description" content="Shop handwoven sussi: unstitched suits, ready to wear kurtas, dupattas and festive sussi. Delivered across Pakistan.">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="shop">
+<div id="header"></div>
+<main>
+  <section class="page-head">
+    <div class="stripes" data-swatch="bahawal-baagh"></div>
+    <div class="wrap" style="position:relative">
+      <div class="crumbs"><a href="index.html">Home</a> / Shop</div>
+      <h1 id="title">All Sussi</h1>
+      <p>Every piece below is handwoven sussi. Nothing printed, nothing machine-made — just stripes, thread by thread.</p>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="shop-bar">
+      <div class="chips" id="chips"></div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <input id="q" type="search" placeholder="Search a weave…" aria-label="Search" style="border:1px solid var(--line);background:transparent;padding:10px 14px;font-size:.85rem;min-width:200px">
+        <select class="sort" id="sort" aria-label="Sort">
+          <option value="feat">Featured</option>
+          <option value="low">Price: low to high</option>
+          <option value="high">Price: high to low</option>
+          <option value="az">Name A–Z</option>
+        </select>
+      </div>
+    </div>
+    <p id="count" class="eyebrow" style="margin-bottom:30px"></p>
+    <div class="grid" id="grid" style="margin-bottom:120px"></div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener("sl:ready", () => {
+  const params = new URLSearchParams(location.search);
+  let cat = params.get("cat") || "all";
+  const chips = document.getElementById("chips"), grid = document.getElementById("grid");
+  const q = document.getElementById("q"), sort = document.getElementById("sort");
+  const cats = { all: "All Sussi", ...SL_CATS };
+  function render() {
+    chips.innerHTML = Object.entries(cats).map(([k, v]) => `<button class="chip${k === cat ? " on" : ""}" data-c="${k}">${v}</button>`).join("");
+    document.getElementById("title").textContent = cats[cat] || "All Sussi";
+    let list = SL.P.filter(p => cat === "all" || p.cat === cat);
+    const t = q.value.trim().toLowerCase();
+    if (t) list = list.filter(p => (p.name + " " + p.sub + " " + p.desc).toLowerCase().includes(t));
+    if (sort.value === "low") list.sort((a, b) => a.price - b.price);
+    if (sort.value === "high") list.sort((a, b) => b.price - a.price);
+    if (sort.value === "az") list.sort((a, b) => a.name.localeCompare(b.name));
+    const views = ["drape", "flat", "drape", "folded"];
+    grid.innerHTML = list.length ? list.map((p, i) => SL.card(p, p.cat === "dupatta" ? "flat" : p.cat === "unstitched" && i % 2 ? "folded" : "drape")).join("")
+      : `<p style="grid-column:1/-1;text-align:center;padding:60px 0">No weave matches that. <a class="link" href="shop.html">See everything</a></p>`;
+    document.getElementById("count").textContent = list.length + (list.length === 1 ? " piece" : " pieces");
+    SL.reveal();
+  }
+  chips.addEventListener("click", e => {
+    const b = e.target.closest("[data-c]"); if (!b) return;
+    cat = b.dataset.c;
+    history.replaceState(null, "", cat === "all" ? "shop.html" : "shop.html?cat=" + cat);
+    render();
+  });
+  q.addEventListener("input", render);
+  sort.addEventListener("change", render);
+  render();
+});
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-/* Sussi Loom — stylesheet */
+/* Sussi Loom · stylesheet */
 :root{
   --cream:#f6f0e7;
   --paper:#fbf7f1;
@@ -441,4 +441,34 @@ select.sort{background:transparent;border:1px solid var(--line);padding:10px 14p
 @media (prefers-reduced-motion:reduce){
   .rv{opacity:1;transform:none;transition:none}
   .announce .track{animation:none}
+}
+
+/* ---------- motion: presses, saves, page changes ---------- */
+.btn,.chip,.link,.icon-btn,.remove,.sizes button,.thumbs button,.qty button,.faq summary,.spec summary,.wa-fab,select.sort{transition:transform .14s cubic-bezier(.3,.7,.4,1),background .35s,color .35s,gap .35s,border-color .25s,opacity .25s}
+.btn{overflow:hidden;isolation:isolate}
+.btn:active,.chip:active,.sizes button:active,.thumbs button:active,.remove:active{transform:scale(.95)}
+.link:active,.icon-btn:active,.faq summary:active,.spec summary:active{transform:scale(.97)}
+.wa-fab:active{transform:scale(.9)}
+.ripple{position:absolute;border-radius:50%;pointer-events:none;background:currentColor;opacity:.28;transform:scale(0);animation:ripple .55s ease-out forwards;z-index:-1}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+.btn.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(.92)}70%{transform:scale(1.06)}100%{transform:scale(1)}}
+.card.saved .media{animation:savedFlash .7s ease-out}
+@keyframes savedFlash{0%{box-shadow:0 0 0 0 rgba(167,122,69,.7)}100%{box-shadow:0 0 0 14px rgba(167,122,69,0)}}
+.card.saved .media svg{transform:scale(1.04)}
+.fly-heart{position:fixed;z-index:200;pointer-events:none;color:var(--gold);font-size:22px;line-height:1;margin:-11px 0 0 -8px;text-shadow:0 4px 10px rgba(91,61,34,.35)}
+.cart-count.bump{animation:bump .5s cubic-bezier(.3,1.8,.5,1)}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.7);background:var(--gold)}100%{transform:scale(1)}}
+.icon-btn.bump svg{animation:pop .5s cubic-bezier(.3,1.6,.5,1);fill:rgba(167,122,69,.35)}
+.line-item.out{animation:out .28s ease-in forwards}
+@keyframes out{to{opacity:0;transform:translateX(-24px)}}
+
+/* page change: quick fade/rise in, quicker fade out */
+main{animation:pageIn .26s cubic-bezier(.2,.7,.2,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}}
+body.leaving main,body.leaving .site-footer,body.leaving .sec{opacity:0;transform:translateY(-4px);transition:opacity .12s ease-in,transform .12s ease-in}
+@media (prefers-reduced-motion:reduce){
+  main,.btn.pop,.cart-count.bump,.card.saved .media,.line-item.out{animation:none}
+  .ripple,.fly-heart{display:none}
+  body.leaving main,body.leaving .site-footer,body.leaving .sec{transition:none}
 }

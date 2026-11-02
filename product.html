@@ -26,7 +26,7 @@
 document.addEventListener("sl:ready", () => {
   const id = new URLSearchParams(location.search).get("id");
   const p = SL.byId(id) || SL.P[0];
-  document.title = p.name + " — Sussi Loom";
+  document.title = p.name + " | Sussi Loom";
   const views = [p.view || "drape", "close", "drape", "flat", "folded", "kurta", "cushion"].filter((v, i, arr) => arr.indexOf(v) === i)
     .filter(v => (v !== "kurta" || p.view === "kurta") && (v !== "cushion" || p.view === "cushion")).slice(0, 4);
   const colours = [...new Set(p.weave.map(w => w[0]))];
@@ -56,16 +56,16 @@ document.addEventListener("sl:ready", () => {
           <tr><th>Woven in</th><td>${p.origin}</td></tr>
           <tr><th>Cloth</th><td>${p.fabric}</td></tr>
           <tr><th>Weight</th><td>${p.weight}</td></tr>
-          ${p.width !== "—" ? `<tr><th>Loom width</th><td>${p.width}</td></tr>` : ""}
+          ${p.width ? `<tr><th>Loom width</th><td>${p.width}</td></tr>` : ""}
           <tr><th>What you get</th><td>${p.length}</td></tr>
           <tr><th>Time on the loom</th><td>${p.loom}</td></tr>
-          ${p.check ? `<tr><th>Weave</th><td>Chaarkhana — stripes run both ways to form a check</td></tr>` : ""}
+          ${p.check ? `<tr><th>Weave</th><td>Chaarkhana: stripes run both ways to form a check</td></tr>` : ""}
           <tr><th>Wear it with</th><td>${p.pair}</td></tr>
         </table>
         <div class="spec">
           <details><summary>Why it looks slightly uneven</summary><p>Sussi is woven by hand, so a stripe can wander a hair's width and the shade can shift slightly between dye batches. The piece you get may not match the drawing above exactly. No two lengths are identical.</p></details>
-          ${p.sizes ? `<details id="size"><summary>Size guide</summary><p>Chest: XS 34" · S 36" · M 38" · L 40" · XL 42" · XXL 44". Cut relaxed — if you're between sizes, go down. Send us your measurements on WhatsApp and we'll advise.</p></details>` : ""}
-          <details><summary>Care</summary><p>First wash alone in cold water — expect a little dye to run, once. After that, gentle machine wash cold, dry in shade, iron medium on the reverse. No bleach.${/silk|zari/i.test(p.fabric) ? " Zari lines: iron on the reverse only." : ""}</p></details>
+          ${p.sizes ? `<details id="size"><summary>Size guide</summary><p>Chest: XS 34" · S 36" · M 38" · L 40" · XL 42" · XXL 44". Cut relaxed: if you're between sizes, go down. Send us your measurements on WhatsApp and we'll advise.</p></details>` : ""}
+          <details><summary>Care</summary><p>First wash alone in cold water and expect a little dye to run, once. After that, gentle machine wash cold, dry in shade, iron medium on the reverse. No bleach.${/silk|zari/i.test(p.fabric) ? " Zari lines: iron on the reverse only." : ""}</p></details>
           <details><summary>Launch &amp; delivery</summary><p>Prices go live on launch day. Saved and WhatsApp-list customers hear first. Delivery across Pakistan: Karachi 2–3 working days, other cities 3–5. Cash on delivery available.</p></details>
         </div>
       </div>

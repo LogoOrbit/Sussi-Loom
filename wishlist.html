@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Your Wishlist — Sussi Loom</title>
+<title>Your Wishlist | Sussi Loom</title>
 <meta name="description" content="The Sussi Loom weaves you've saved for launch.">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,7 @@
 <div id="header"></div>
 <main>
   <section class="page-head" style="padding:60px 0 50px">
-    <div class="wrap"><div class="crumbs"><a href="index.html">Home</a> / Wishlist</div><h1>Saved for launch</h1><p>Nothing is on sale yet. Send us this list and we'll message you the moment these pieces go live — with prices.</p></div>
+    <div class="wrap"><div class="crumbs"><a href="index.html">Home</a> / Wishlist</div><h1>Saved for launch</h1><p>Nothing is on sale yet. Send us this list and we'll message you the moment these pieces go live, with prices.</p></div>
   </section>
   <div class="wrap" id="cart-root"></div>
 </main>
@@ -35,7 +35,7 @@ document.addEventListener("sl:ready", () => {
         <a class="btn" href="shop.html" data-arrow>Preview the collection</a></div>`;
       arrows(); return;
     }
-    const msg = "Hi Sussi Loom, please message me when these launch:\n" + items.map(p => "• " + p.name + " — " + p.sub).join("\n");
+    const msg = "Hi Sussi Loom, please message me when these launch:\n" + items.map(p => "• " + p.name + " · " + p.sub).join("\n");
     root.innerHTML = `<div class="cart-layout">
       <div>
         ${items.map(p => `<div class="line-item">
@@ -57,7 +57,9 @@ document.addEventListener("sl:ready", () => {
   }
   root.addEventListener("click", e => {
     const b = e.target.closest("[data-rm]"); if (!b) return;
-    SL.Wish.remove(b.dataset.rm); render();
+    const row = b.closest(".line-item");
+    SL.Wish.remove(b.dataset.rm);
+    if (row && !matchMedia("(prefers-reduced-motion: reduce)").matches) { row.classList.add("out"); setTimeout(render, 280); } else render();
   });
   render();
 });

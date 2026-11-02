@@ -1,4 +1,4 @@
-/* Sussi Loom — shared layout, fabric drawings, launch wishlist */
+/* Sussi Loom, shared layout, fabric drawings, launch wishlist */
 (function () {
   const PHONE = "+92 317 7907812";
   const WA = "923177907812";
@@ -244,7 +244,7 @@
           <div class="foot-grid">
             <div>
               <img class="foot-logo" src="assets/img/logo-full.png" alt="Sussi Loom" width="132" height="110">
-              <p>The only house in Pakistan devoted entirely to sussi — the striped handloom cloth of Sindh and southern Punjab. Nothing else, ever.</p>
+              <p>The only house in Pakistan devoted entirely to sussi, the striped handloom cloth of Sindh and southern Punjab. Nothing else, ever.</p>
             </div>
             <div><h5>Shop</h5><ul>
               <li><a href="shop.html?cat=unstitched">Unstitched</a></li><li><a href="shop.html?cat=ready">Ready to Wear</a></li>
@@ -293,8 +293,65 @@
       const p = byId(b.dataset.wish);
       if (!p) return;
       const on = Wish.toggle(p.id);
-      toast(on ? `<span>${p.name} saved — we'll tell you when it's live</span><a href="wishlist.html">Wishlist</a>` : `<span>${p.name} removed</span>`);
+      replay(b, "pop");
+      if (on) { const c = b.closest(".card"); if (c) replay(c, "saved"); flyToWishlist(b); }
+      toast(on ? `<span>${p.name} saved. We'll tell you when it's live</span><a href="wishlist.html">Wishlist</a>` : `<span>${p.name} removed</span>`);
     });
+  }
+
+  /* ---------- motion ---------- */
+  const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function replay(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 800); }
+
+  // a heart arcs from the pressed button to the header wishlist icon, then the count bumps
+  function flyToWishlist(from) {
+    const target = $('.site-header a[href="wishlist.html"]');
+    if (!target) return;
+    const bump = () => { replay(target, "bump"); $$(".cart-count").forEach((c) => replay(c, "bump")); };
+    if (calm() || !Element.prototype.animate) return bump();
+    const a = from.getBoundingClientRect(), t = target.getBoundingClientRect();
+    const x0 = a.left + a.width / 2, y0 = a.top + a.height / 2, x1 = t.left + t.width / 2, y1 = t.top + t.height / 2;
+    const h = document.createElement("span");
+    h.className = "fly-heart"; h.textContent = "♥";
+    h.style.left = x0 + "px"; h.style.top = y0 + "px";
+    document.body.appendChild(h);
+    const dx = x1 - x0, dy = y1 - y0, lift = Math.min(-80, dy / 2 - 60);
+    h.animate([
+      { transform: "translate(0,0) scale(.6)", opacity: 0 },
+      { transform: `translate(${dx * 0.15}px,${lift * 0.6}px) scale(1.5)`, opacity: 1, offset: 0.2 },
+      { transform: `translate(${dx * 0.6}px,${lift}px) scale(1.1)`, opacity: 1, offset: 0.6 },
+      { transform: `translate(${dx}px,${dy}px) scale(.4)`, opacity: 0.2 }
+    ], { duration: 720, easing: "cubic-bezier(.45,0,.35,1)" }).onfinish = () => { h.remove(); bump(); };
+  }
+
+  // ink ripple from the press point on every .btn
+  function ripples() {
+    document.addEventListener("pointerdown", (e) => {
+      const b = e.target.closest(".btn");
+      if (!b || calm()) return;
+      const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2.2;
+      const s = document.createElement("span");
+      s.className = "ripple";
+      s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
+      b.appendChild(s);
+      setTimeout(() => s.remove(), 600);
+    });
+  }
+
+  // fast page change: fade out ~120ms, the next page fades in via CSS
+  function pageTransitions() {
+    document.addEventListener("click", (e) => {
+      const l = e.target.closest("a[href]");
+      if (!l || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (l.target === "_blank" || l.hasAttribute("download")) return;
+      const u = new URL(l.href, location.href);
+      if (u.origin !== location.origin || (u.pathname === location.pathname && u.search === location.search)) return;
+      if (calm()) return;
+      e.preventDefault();
+      document.body.classList.add("leaving");
+      setTimeout(() => (location.href = u.href), 120);
+    });
+    addEventListener("pageshow", () => document.body.classList.remove("leaving"));
   }
 
   /* ---------- reveal on scroll ---------- */
@@ -305,13 +362,15 @@
     els.forEach((e) => io.observe(e));
   }
 
-  window.SL = { swatch, card, Wish, toast, byId, bindWish, reveal, updateCount, waLink, I, PHONE, WA, P };
+  window.SL = { swatch, card, Wish, toast, byId, bindWish, reveal, updateCount, waLink, replay, I, PHONE, WA, P };
 
   document.addEventListener("DOMContentLoaded", () => {
     layout();
     $$("[data-swatch]").forEach((el) => { const p = byId(el.dataset.swatch); if (p) el.innerHTML = swatch(p, el.dataset.view || "drape"); });
     $$("[data-arrow]").forEach((el) => el.insertAdjacentHTML("beforeend", I.arrow));
     bindWish();
+    ripples();
+    pageTransitions();
     document.dispatchEvent(new Event("sl:ready"));
     updateCount();
     reveal();

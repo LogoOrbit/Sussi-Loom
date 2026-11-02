@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shop Sussi — Sussi Loom</title>
-<meta name="description" content="Shop handwoven sussi: unstitched suits, ready to wear kurtas, dupattas and festive sussi. Delivered across Pakistan.">
+<title>The Collection — Sussi Loom</title>
+<meta name="description" content="Preview the first Sussi Loom collection: 24 handwoven sussi weaves — unstitched, ready to wear, men, dupattas & shawls, festive and home. Coming soon.">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
@@ -16,9 +16,9 @@
   <section class="page-head">
     <div class="stripes" data-swatch="bahawal-baagh"></div>
     <div class="wrap" style="position:relative">
-      <div class="crumbs"><a href="index.html">Home</a> / Shop</div>
+      <div class="crumbs"><a href="index.html">Home</a> / Collection</div>
       <h1 id="title">All Sussi</h1>
-      <p>Every piece below is handwoven sussi. Nothing printed, nothing machine-made — just stripes, thread by thread.</p>
+      <p>The first collection, coming soon. Prices go up on launch day — save the weaves you like and we'll message you when they're live.</p>
     </div>
   </section>
 
@@ -26,11 +26,11 @@
     <div class="shop-bar">
       <div class="chips" id="chips"></div>
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
-        <input id="q" type="search" placeholder="Search a weave…" aria-label="Search" style="border:1px solid var(--line);background:transparent;padding:10px 14px;font-size:.85rem;min-width:200px">
+        <input id="q" type="search" placeholder="Search a weave, colour, town…" aria-label="Search" style="border:1px solid var(--line);background:transparent;padding:10px 14px;font-size:.85rem;min-width:200px">
         <select class="sort" id="sort" aria-label="Sort">
           <option value="feat">Featured</option>
-          <option value="low">Price: low to high</option>
-          <option value="high">Price: high to low</option>
+          <option value="new">New &amp; limited first</option>
+          <option value="town">By weaving town</option>
           <option value="az">Name A–Z</option>
         </select>
       </div>
@@ -54,14 +54,14 @@ document.addEventListener("sl:ready", () => {
     document.getElementById("title").textContent = cats[cat] || "All Sussi";
     let list = SL.P.filter(p => cat === "all" || p.cat === cat);
     const t = q.value.trim().toLowerCase();
-    if (t) list = list.filter(p => (p.name + " " + p.sub + " " + p.desc).toLowerCase().includes(t));
-    if (sort.value === "low") list.sort((a, b) => a.price - b.price);
-    if (sort.value === "high") list.sort((a, b) => b.price - a.price);
+    if (t) list = list.filter(p => (p.name + " " + p.sub + " " + p.desc + " " + p.origin + " " + p.threads.join(" ")).toLowerCase().includes(t));
+    if (sort.value === "new") list.sort((a, b) => !!b.badge - !!a.badge);
+    if (sort.value === "town") list.sort((a, b) => a.origin.localeCompare(b.origin));
     if (sort.value === "az") list.sort((a, b) => a.name.localeCompare(b.name));
-    const views = ["drape", "flat", "drape", "folded"];
-    grid.innerHTML = list.length ? list.map((p, i) => SL.card(p, p.cat === "dupatta" ? "flat" : p.cat === "unstitched" && i % 2 ? "folded" : "drape")).join("")
+    grid.innerHTML = list.length ? list.map(p => SL.card(p)).join("")
       : `<p style="grid-column:1/-1;text-align:center;padding:60px 0">No weave matches that. <a class="link" href="shop.html">See everything</a></p>`;
     document.getElementById("count").textContent = list.length + (list.length === 1 ? " piece" : " pieces");
+    SL.updateCount();
     SL.reveal();
   }
   chips.addEventListener("click", e => {

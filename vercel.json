@@ -1,6 +1,11 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/cart", "destination": "/wishlist", "permanent": false },
+    { "source": "/checkout", "destination": "/wishlist", "permanent": false },
+    { "source": "/thank-you", "destination": "/wishlist", "permanent": false }
+  ],
   "headers": [
     { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] }
   ]

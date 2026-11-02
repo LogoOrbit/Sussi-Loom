@@ -1,12 +1,9 @@
-/* Sussi Loom — shared layout, fabric drawings, cart */
+/* Sussi Loom — shared layout, fabric drawings, launch wishlist */
 (function () {
   const PHONE = "+92 317 7907812";
   const WA = "923177907812";
-  const FREE_SHIP = 7000;
-  const SHIP_FEE = 250;
   const P = window.SL_PRODUCTS || [];
   const byId = (id) => P.find((p) => p.id === id);
-  const pkr = (n) => "PKR " + Number(n).toLocaleString("en-PK");
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   let uid = 0;
@@ -25,7 +22,18 @@
     return out;
   }
 
-  function swatch(p, view = "drape") {
+  // stripes, plus the same order run crosswise for chaarkhana (check) pieces
+  function cloth(p, scale, w, h) {
+    let out = stripes(p.weave, scale, w, h);
+    if (p.check) {
+      const L = Math.max(w, h) + 200;
+      out += `<g opacity=".5" style="mix-blend-mode:multiply" transform="translate(${w / 2} ${h / 2}) rotate(90) translate(${-L / 2} ${-L / 2})">${stripes(p.weave, scale, L, L)}</g>`;
+    }
+    return out;
+  }
+
+  function swatch(p, view) {
+    view = view || p.view || "drape";
     const id = "f" + uid++;
     const W = 300, H = 400;
     const weave = p.weave;
@@ -52,7 +60,7 @@
           <filter id="${id}d"><feTurbulence baseFrequency=".006 .02" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
           <radialGradient id="${id}v" cx=".5" cy=".45" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient>
         </defs>
-        <g filter="url(#${id}d)">${stripes(weave, 5.2, W, H)}</g>
+        <g filter="url(#${id}d)">${cloth(p, 5.2, W, H)}</g>
         <rect width="${W}" height="${H}" fill="url(#${id}x)"/>
         <rect width="${W}" height="${H}" fill="${base}" filter="url(#${id}n)"/>
         <rect width="${W}" height="${H}" fill="url(#${id}v)"/>
@@ -63,7 +71,7 @@
       const fold = (y, s, sh) => `
         <g transform="translate(40 ${y})">
           <rect x="4" y="10" width="220" height="${s}" fill="#000" opacity=".12" filter="url(#${id}b)"/>
-          <svg width="220" height="${s}" overflow="hidden">${stripes(weave, 1.25, 220, s)}<rect width="220" height="${s}" fill="url(#${id}w)"/><rect width="220" height="${s}" fill="url(#${id}fg)"/></svg>
+          <svg width="220" height="${s}" overflow="hidden">${cloth(p, 1.25, 220, s)}<rect width="220" height="${s}" fill="url(#${id}w)"/><rect width="220" height="${s}" fill="url(#${id}fg)"/></svg>
           <rect width="220" height="${s}" fill="none" stroke="#000" stroke-opacity=".08"/>
           <rect y="${s - 6}" width="220" height="6" fill="#000" opacity="${sh}"/>
         </g>`;
@@ -86,9 +94,59 @@
       return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${p.name} flat lay">
         <defs>${texture}<linearGradient id="${id}s" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".12"/><stop offset=".25" stop-color="#fff" stop-opacity=".08"/><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".14"/></linearGradient></defs>
         <rect width="${W}" height="${H}" fill="#eadfcd"/>
-        <svg y="0" width="${W}" height="352" overflow="hidden">${stripes(weave, 1.6, W, 352)}<rect width="${W}" height="352" fill="url(#${id}w)"/><rect width="${W}" height="352" fill="${base}" filter="url(#${id}n)"/><rect width="${W}" height="352" fill="url(#${id}s)"/></svg>
+        <svg y="0" width="${W}" height="352" overflow="hidden">${cloth(p, 1.6, W, 352)}<rect width="${W}" height="352" fill="url(#${id}w)"/><rect width="${W}" height="352" fill="${base}" filter="url(#${id}n)"/><rect width="${W}" height="352" fill="url(#${id}s)"/></svg>
         <rect y="340" width="${W}" height="12" fill="#000" opacity=".12"/>
         ${tassels}
+      </svg>`;
+    }
+
+    if (view === "kurta") {
+      const vest = /waistcoat/i.test(p.sub);
+      const body = vest
+        ? "M112 62 Q150 132 188 62 L224 74 Q214 112 228 134 L230 318 Q150 330 70 318 L72 134 Q86 112 76 74 Z"
+        : "M120 60 Q150 76 180 60 L232 76 L284 186 L258 198 L222 126 L224 356 Q150 368 76 356 L78 126 L42 198 L16 186 L68 76 Z";
+      const trim = vest
+        ? `<path d="M150 122 V318" stroke="#000" stroke-opacity=".28" stroke-width="1.4"/>${[150, 180, 210, 240, 270].map((y) => `<circle cx="154" cy="${y}" r="3.4" fill="${weave[weave.length - 1][0]}" stroke="#000" stroke-opacity=".3"/>`).join("")}
+           <path d="M88 220 h30 M182 220 h30" stroke="#000" stroke-opacity=".3" stroke-width="1.2"/>`
+        : `<path d="M120 60 Q150 82 180 60" stroke="#000" stroke-opacity=".35" stroke-width="2" fill="none"/>
+           <path d="M150 74 V138" stroke="#000" stroke-opacity=".28" stroke-width="1.4"/>
+           ${[92, 108, 124].map((y) => `<circle cx="150" cy="${y}" r="2.8" fill="#f4ead8" stroke="#000" stroke-opacity=".25"/>`).join("")}
+           <path d="M80 318 L78 356 M220 318 L222 356" stroke="#000" stroke-opacity=".25"/>`;
+      return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${p.name} ${p.sub}">
+        <defs>${texture}
+          <clipPath id="${id}c"><path d="${body}"/></clipPath>
+          <filter id="${id}b"><feGaussianBlur stdDeviation="8"/></filter>
+          <linearGradient id="${id}s" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".3" stop-color="#fff" stop-opacity=".1"/><stop offset=".55" stop-color="#000" stop-opacity=".04"/><stop offset=".75" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></linearGradient>
+          <linearGradient id="${id}bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1e8da"/><stop offset="1" stop-color="#e2d4bf"/></linearGradient>
+        </defs>
+        <rect width="${W}" height="${H}" fill="url(#${id}bg)"/>
+        <path d="M150 50 V30 q0-10 9-10 q9 0 9 9" stroke="#8a6a48" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M150 50 L${vest ? "104 70" : "86 72"} M150 50 L${vest ? "196 70" : "214 72"}" stroke="#8a6a48" stroke-width="3" stroke-linecap="round"/>
+        <path d="${body}" fill="#000" opacity=".22" transform="translate(6 12)" filter="url(#${id}b)"/>
+        <g clip-path="url(#${id}c)">${cloth(p, 1.5, W, H)}
+          <rect width="${W}" height="${H}" fill="url(#${id}w)"/><rect width="${W}" height="${H}" fill="${base}" filter="url(#${id}n)"/><rect width="${W}" height="${H}" fill="url(#${id}s)"/></g>
+        ${trim}
+      </svg>`;
+    }
+
+    if (view === "cushion") {
+      const pillow = "M0 0 Q90 12 180 0 Q170 90 180 180 Q90 168 0 180 Q10 90 0 0Z";
+      const one = (tx, ty, rot, sc, k) => `
+        <g transform="translate(${tx} ${ty}) rotate(${rot}) scale(${sc})">
+          <path d="${pillow}" fill="#000" opacity=".22" transform="translate(6 14)" filter="url(#${id}b)"/>
+          <clipPath id="${id}c${k}"><path d="${pillow}"/></clipPath>
+          <g clip-path="url(#${id}c${k})">${cloth(p, 1.4, 180, 180)}<rect width="180" height="180" fill="url(#${id}w)"/><rect width="180" height="180" fill="url(#${id}r)"/></g>
+          <path d="${pillow}" fill="none" stroke="${weave[0][0]}" stroke-width="5" stroke-linejoin="round"/>
+          <path d="${pillow}" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="1"/>
+        </g>`;
+      return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${p.name} cushions">
+        <defs>${texture}
+          <filter id="${id}b"><feGaussianBlur stdDeviation="7"/></filter>
+          <radialGradient id="${id}r" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient>
+          <linearGradient id="${id}bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe5d6"/><stop offset=".62" stop-color="#e4d6c1"/><stop offset=".62" stop-color="#cdb795"/><stop offset="1" stop-color="#bfa682"/></linearGradient>
+        </defs>
+        <rect width="${W}" height="${H}" fill="url(#${id}bg)"/>
+        ${one(96, 70, 6, 0.9, "a")}${one(36, 160, -5, 1, "b")}
       </svg>`;
     }
 
@@ -107,7 +165,7 @@
         </linearGradient>
         <linearGradient id="${id}t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient>
       </defs>
-      <g filter="url(#${id}d)">${stripes(weave, 1.8, W, H)}</g>
+      <g filter="url(#${id}d)">${cloth(p, 1.8, W, H)}</g>
       <rect width="${W}" height="${H}" fill="url(#${id}w)"/>
       <rect width="${W}" height="${H}" fill="${base}" filter="url(#${id}n)"/>
       <rect width="${W}" height="${H}" fill="url(#${id}g)"/>
@@ -115,36 +173,25 @@
     </svg>`;
   }
 
-  /* ---------- cart store ---------- */
-  const KEY = "sl_cart_v1";
-  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+  /* ---------- launch wishlist (no prices / checkout until launch) ---------- */
+  const KEY = "sl_wish_v1";
+  const read = () => { try { const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v.filter((id) => byId(id)) : []; } catch { return []; } };
   const write = (c) => { try { localStorage.setItem(KEY, JSON.stringify(c)); } catch {} updateCount(); };
-  const Cart = {
-    items: read,
-    add(id, qty = 1, size = null) {
-      const c = read();
-      const key = id + "|" + (size || "");
-      const ex = c.find((i) => i.key === key);
-      if (ex) ex.qty = Math.min(10, ex.qty + qty);
-      else c.push({ key, id, size, qty });
-      write(c);
-    },
-    setQty(key, qty) {
-      let c = read();
-      c = c.map((i) => (i.key === key ? { ...i, qty: Math.max(1, Math.min(10, qty)) } : i));
-      write(c);
-    },
-    remove(key) { write(read().filter((i) => i.key !== key)); },
+  const Wish = {
+    ids: read,
+    has: (id) => read().includes(id),
+    toggle(id) { const c = read(); const on = !c.includes(id); write(on ? [...c, id] : c.filter((x) => x !== id)); return on; },
+    remove(id) { write(read().filter((x) => x !== id)); },
     clear() { write([]); },
-    count() { return read().reduce((a, i) => a + i.qty, 0); },
-    lines() { return read().map((i) => ({ ...i, p: byId(i.id) })).filter((l) => l.p); },
-    totals() {
-      const sub = Cart.lines().reduce((a, l) => a + l.p.price * l.qty, 0);
-      const ship = sub === 0 || sub >= FREE_SHIP ? 0 : SHIP_FEE;
-      return { sub, ship, total: sub + ship };
-    }
+    count: () => read().length,
+    items: () => read().map(byId)
   };
-  function updateCount() { $$(".cart-count").forEach((el) => (el.textContent = Cart.count())); }
+  function updateCount() {
+    const n = Wish.count();
+    $$(".cart-count").forEach((el) => (el.textContent = n));
+    $$("[data-wish]").forEach((b) => { const on = Wish.has(b.dataset.wish); b.classList.toggle("on", on); b.innerHTML = on ? "♥ Saved" : "♡ Save for launch"; });
+  }
+  const waLink = (text) => "https://wa.me/" + WA + "?text=" + encodeURIComponent(text);
 
   /* ---------- toast ---------- */
   function toast(html) {
@@ -160,7 +207,7 @@
   const I = {
     arrow: `<svg class="arrow" viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M0 5h15M11 1l4 4-4 4"/></svg>`,
     search: `<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>`,
-    bag: `<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>`,
+    heart: `<svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20Z"/></svg>`,
     menu: `<svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h12M3 17h18"/></svg>`,
     wa: `<svg viewBox="0 0 32 32"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7a10.7 10.7 0 0 1-5.5-1.5l-.4-.2-3.9 1 1-3.8-.2-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.3c-.2.2-.4.2-.7.1a8.8 8.8 0 0 1-4.4-3.8c-.3-.6.3-.5 1-1.7.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.7 3.7 0 0 0-1.1 2.7 6.4 6.4 0 0 0 1.3 3.4 14.7 14.7 0 0 0 5.6 5c2.1.9 2.9 1 4 .8a3.4 3.4 0 0 0 2.2-1.6 2.8 2.8 0 0 0 .2-1.6c0-.2-.3-.3-.6-.5Z"/></svg>`
   };
@@ -170,24 +217,24 @@
     const page = document.body.dataset.page || "";
     const a = (href, label, key) => `<a class="nl${page === key ? " active" : ""}" href="${href}">${label}</a>`;
     const header = `
-      <div class="announce" aria-label="Announcements"><div class="track">${("<span>Free shipping across Pakistan above PKR 7,000</span><span>Handwoven sussi · Made in Pakistan</span><span>Order on WhatsApp · " + PHONE + "</span><span>Cash on delivery available</span>").repeat(2)}</div></div>
+      <div class="announce" aria-label="Announcements"><div class="track">${("<span>First collection · coming soon</span><span>24 weaves from Hala, Nasarpur, Multan &amp; Bahawalpur</span><span>Join the launch list on WhatsApp · " + PHONE + "</span><span>Prices announced at launch</span>").repeat(2)}</div></div>
       <header class="site-header">
         <div class="wrap nav">
           <button class="burger icon-btn" aria-label="Open menu">${I.menu}</button>
           <nav class="nav-left" aria-label="Main">
-            ${a("index.html", "Home", "home")}${a("shop.html", "Shop", "shop")}${a("what-is-sussi.html", "What is Sussi", "sussi")}
+            ${a("index.html", "Home", "home")}${a("shop.html", "Collection", "shop")}${a("what-is-sussi.html", "What is Sussi", "sussi")}
           </nav>
           <a href="index.html" class="brand" aria-label="Sussi Loom home"><img src="assets/img/logo-full.png" alt="Sussi Loom" width="94" height="78"></a>
           <div class="nav-right">
             ${a("our-story.html", "Our Story", "story")}${a("contact.html", "Contact", "contact")}
             <a href="shop.html" class="icon-btn" aria-label="Search the shop">${I.search}</a>
-            <a href="cart.html" class="icon-btn" aria-label="Cart">${I.bag}<span class="cart-count">0</span></a>
+            <a href="wishlist.html" class="icon-btn" aria-label="Launch wishlist">${I.heart}<span class="cart-count">0</span></a>
           </div>
         </div>
       </header>
       <div class="mobile-menu" aria-hidden="true">
         <button class="close" aria-label="Close menu">×</button>
-        <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="what-is-sussi.html">What is Sussi</a><a href="our-story.html">Our Story</a><a href="contact.html">Contact</a><a href="cart.html">Cart</a>
+        <a href="index.html">Home</a><a href="shop.html">Collection</a><a href="what-is-sussi.html">What is Sussi</a><a href="our-story.html">Our Story</a><a href="contact.html">Contact</a><a href="wishlist.html">Wishlist</a>
         <p style="margin-top:30px">WhatsApp · <a style="font-size:1rem;display:inline;border:0;font-family:var(--sans)" href="https://wa.me/${WA}">${PHONE}</a></p>
       </div>`;
     const footer = `
@@ -201,16 +248,17 @@
             </div>
             <div><h5>Shop</h5><ul>
               <li><a href="shop.html?cat=unstitched">Unstitched</a></li><li><a href="shop.html?cat=ready">Ready to Wear</a></li>
-              <li><a href="shop.html?cat=dupatta">Dupattas</a></li><li><a href="shop.html?cat=festive">Festive</a></li></ul></div>
+              <li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=dupatta">Dupattas &amp; Shawls</a></li>
+              <li><a href="shop.html?cat=festive">Festive</a></li><li><a href="shop.html?cat=home">Home</a></li></ul></div>
             <div><h5>House</h5><ul>
               <li><a href="what-is-sussi.html">What is Sussi</a></li><li><a href="our-story.html">Our Story</a></li>
-              <li><a href="contact.html">Contact</a></li><li><a href="cart.html">Your Cart</a></li></ul></div>
+              <li><a href="contact.html">Contact</a></li><li><a href="wishlist.html">Your Wishlist</a></li></ul></div>
             <div><h5>Talk to us</h5><ul>
               <li><a href="https://wa.me/${WA}">WhatsApp · ${PHONE}</a></li>
               <li><a href="tel:+923177907812">Call · ${PHONE}</a></li>
               <li>Karachi, Pakistan</li><li>Mon – Sat · 11am – 8pm</li></ul></div>
           </div>
-          <div class="foot-bottom"><span>© ${new Date().getFullYear()} Sussi Loom. Woven by hand in Pakistan.</span><span>Cash on delivery · Bank transfer · JazzCash / Easypaisa</span></div>
+          <div class="foot-bottom"><span>© ${new Date().getFullYear()} Sussi Loom. Woven by hand in Pakistan.</span><span>First collection coming soon · Karachi studio</span></div>
         </div>
       </footer>
       <a class="wa-fab" href="https://wa.me/${WA}?text=${encodeURIComponent("Assalam o Alaikum Sussi Loom, I'd like to ask about your sussi.")}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">${I.wa}</a>`;
@@ -225,27 +273,27 @@
   }
 
   /* ---------- product card ---------- */
-  function card(p, view = "drape") {
+  function card(p, view) {
     return `<article class="card rv">
       <a class="media" href="product.html?id=${p.id}" aria-label="${p.name}">${p.badge ? `<span class="badge">${p.badge}</span>` : ""}${swatch(p, view)}</a>
-      <div class="quick"><button class="btn" data-add="${p.id}">Add to cart</button></div>
+      <div class="quick"><button class="btn" data-wish="${p.id}">♡ Save for launch</button></div>
       <div class="meta">
-        <div><a href="product.html?id=${p.id}"><h4>${p.name}</h4></a><div class="sub">${p.sub}</div>
-          <div class="dots">${[...new Set(p.weave.map((w) => w[0]))].slice(0, 4).map((c) => `<i style="background:${c}"></i>`).join("")}</div></div>
-        <div class="price">${pkr(p.price)}</div>
+        <div><a href="product.html?id=${p.id}"><h4>${p.name}</h4></a><div class="sub">${p.sub} · ${p.origin.split(",")[0]}</div>
+          <div class="dots">${[...new Set(p.weave.map((w) => w[0]))].slice(0, 5).map((c) => `<i style="background:${c}"></i>`).join("")}</div></div>
+        <div class="soon">Coming soon</div>
       </div>
     </article>`;
   }
 
-  function bindAdd(root = document) {
+  function bindWish(root = document) {
     root.addEventListener("click", (e) => {
-      const b = e.target.closest("[data-add]");
+      const b = e.target.closest("[data-wish]");
       if (!b) return;
-      const p = byId(b.dataset.add);
+      e.preventDefault();
+      const p = byId(b.dataset.wish);
       if (!p) return;
-      if (p.sizes) { location.href = "product.html?id=" + p.id; return; }
-      Cart.add(p.id, 1);
-      toast(`<span>${p.name} added to your cart</span><a href="cart.html">View cart</a>`);
+      const on = Wish.toggle(p.id);
+      toast(on ? `<span>${p.name} saved — we'll tell you when it's live</span><a href="wishlist.html">Wishlist</a>` : `<span>${p.name} removed</span>`);
     });
   }
 
@@ -257,14 +305,15 @@
     els.forEach((e) => io.observe(e));
   }
 
-  window.SL = { swatch, card, Cart, toast, pkr, byId, bindAdd, reveal, I, PHONE, WA, FREE_SHIP, SHIP_FEE, P };
+  window.SL = { swatch, card, Wish, toast, byId, bindWish, reveal, updateCount, waLink, I, PHONE, WA, P };
 
   document.addEventListener("DOMContentLoaded", () => {
     layout();
     $$("[data-swatch]").forEach((el) => { const p = byId(el.dataset.swatch); if (p) el.innerHTML = swatch(p, el.dataset.view || "drape"); });
     $$("[data-arrow]").forEach((el) => el.insertAdjacentHTML("beforeend", I.arrow));
-    bindAdd();
+    bindWish();
     document.dispatchEvent(new Event("sl:ready"));
+    updateCount();
     reveal();
   });
 })();
